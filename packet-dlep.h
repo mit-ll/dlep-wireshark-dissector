@@ -1,11 +1,9 @@
 /* packet-dlep.h
  * Definitions for DLEP packet disassembly structures and routines
  *
- * See: https://tools.ietf.org/html/draft-ietf-manet-dlep-24
+ * See: https://www.rfc-editor.org/rfc/rfc8175.txt
  *
- * $Id$
- *
- * Copyright (C) 2016 Massachusetts Institute of Technology
+ * Copyright (C) 2019 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -27,7 +25,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-/* Section 11: DLEP Data Items */
+/* Section 13: DLEP Data Items */
 
 /* DLEP Data Item Lengths (bytes) */
 #define DLEP_DIT_STATUS_MINLEN      1     /* variable length */
@@ -35,7 +33,7 @@
 #define DLEP_DIT_V4CONN_WPORT_LEN   7
 #define DLEP_DIT_V6CONN_LEN         17
 #define DLEP_DIT_V6CONN_WPORT_LEN   19
-/* PEERTYPE has variable, non-negative length */
+#define DLEP_DIT_PEERTYPE_MINLEN    1     /* variable length */
 #define DLEP_DIT_HEARTBEAT_LEN      4
 /* EXTSUPP has variable, non-negative length */
 #define DLEP_DIT_MACADDR_EUI48_LEN  6
@@ -54,39 +52,24 @@
 #define DLEP_DIT_RLQT_LEN           1
 #define DLEP_DIT_MTU_LEN            2
 
-/* DLEP Data Item Flags - IPv4 Connection Point */
-#define DLEP_DIT_V4CONN_FLAGS_WIDTH 8     /* bits */
-/* All flags reserved, no masks */
-
-/* DLEP Data Item Flags - IPv6 Connection Point */
-#define DLEP_DIT_V6CONN_FLAGS_WIDTH 8
-/* All flags reserved, no masks */
-
-/* DLEP Data Item Flags - IPv4 Address */
-#define DLEP_DIT_V4ADDR_FLAGS_WIDTH 8
-#define DLEP_DIT_V4ADDR_FLAGS_ADDDROP  0x01
-
-/* DLEP Data Item Flags - IPv6 Address */
-#define DLEP_DIT_V6ADDR_FLAGS_WIDTH 8
-#define DLEP_DIT_V6ADDR_FLAGS_ADDDROP  0x01
-
-/* DLEP Data Item Flags - IPv4 Attached Subnet */
-#define DLEP_DIT_V4SUBNET_FLAGS_WIDTH 8
-#define DLEP_DIT_V4SUBNET_FLAGS_ADDDROP  0x01
-
-/* DLEP Data Item Flags - IPv6 Attached Subnet */
-#define DLEP_DIT_V6SUBNET_FLAGS_WIDTH 8
-#define DLEP_DIT_V6SUBNET_FLAGS_ADDDROP  0x01
+/* DLEP Data Item Flags Lengths (bytes) */
+#define DLEP_DIT_V4CONN_FLAGS_LEN   1
+#define DLEP_DIT_V6CONN_FLAGS_LEN   1
+#define DLEP_DIT_V4ADDR_FLAGS_LEN   1
+#define DLEP_DIT_V6ADDR_FLAGS_LEN   1
+#define DLEP_DIT_PEERTYPE_FLAGS_LEN 1
+#define DLEP_DIT_V4SUBNET_FLAGS_LEN 1
+#define DLEP_DIT_V6SUBNET_FLAGS_LEN 1
 
 
-/* Section 13: IANA Considerations */
+/* Section 15: IANA Considerations */
 
-/* Section 13.2: DLEP Signal Type Codes */
+/* Section 15.2: DLEP Signal Type Codes */
 #define DLEP_SIG_RESERVED         0
 #define DLEP_SIG_PEERDISC         1
 #define DLEP_SIG_PEEROFFR         2
 
-/* Section 13.3: DLEP Message Type Codes */
+/* Section 15.3: DLEP Message Type Codes */
 #define DLEP_MSG_RESERVED         0
 #define DLEP_MSG_SESSINIT         1
 #define DLEP_MSG_SESSINITRESP     2
@@ -105,7 +88,7 @@
 #define DLEP_MSG_LINKCHARRESP     15
 #define DLEP_MSG_HEARTBEAT        16
 
-/* Section 13.4: DLEP Data Item Type Codes */
+/* Section 15.4: DLEP Data Item Type Codes */
 #define DLEP_DIT_RESERVED         0
 #define DLEP_DIT_STATUS           1
 #define DLEP_DIT_V4CONN           2
@@ -128,20 +111,55 @@
 #define DLEP_DIT_RLQT             19
 #define DLEP_DIT_MTU              20
 
-/* Section 13.5: DLEP Status Codes */
+/* Section 15.5: DLEP Status Codes */
 #define DLEP_SC_CONT_SUCCESS      0
 #define DLEP_SC_CONT_NOTINT       1
 #define DLEP_SC_CONT_RQSTDENIED   2
+#define DLEP_SC_CONT_INCONSIST    3
 #define DLEP_SC_TERM_UNKWNMSG     128
 #define DLEP_SC_TERM_UNEXPMSG     129
 #define DLEP_SC_TERM_INVDATA      130
 #define DLEP_SC_TERM_INVDEST      131
 #define DLEP_SC_TERM_TIMEDOUT     132
+#define DLEP_SC_TERM_SHUTDOWN     255
 
-/* Section 13.6: DLEP Extension Type Codes */
+/* Section 15.6: DLEP Extension Type Codes */
 #define DLEP_EXT_RESERVED         0
-#define DLEP_EXT_CREDITWINDOW     1
 
-/* Section 13.7: DLEP Well-known Port */
-#define DLEP_UDP_PORT 30002
-#define DLEP_TCP_PORT 30003
+/* Section 15.7: DLEP IPv4 Connection Point Flags */
+#define DLEP_DIT_V4CONN_FLAGMASK_BITLEN     DLEP_DIT_V4CONN_FLAGS_LEN * 8
+#define DLEP_DIT_V4CONN_FLAGMASK_TLS        0x01
+
+/* Section 15.8: DLEP IPv6 Connection Point Flags */
+#define DLEP_DIT_V6CONN_FLAGMASK_BITLEN     DLEP_DIT_V6CONN_FLAGS_LEN * 8
+#define DLEP_DIT_V6CONN_FLAGMASK_TLS        0x01
+
+/* Section 15.9: DLEP Peer Type Flags */
+#define DLEP_DIT_PEERTYPE_FLAGMASK_BITLEN   DLEP_DIT_PEERTYPE_FLAGS_LEN * 8
+#define DLEP_DIT_PEERTYPE_FLAGMASK_SMI      0x01
+
+/* Section 15.10: DLEP IPv4 Address Flags */
+#define DLEP_DIT_V4ADDR_FLAGMASK_BITLEN     DLEP_DIT_V4ADDR_FLAGS_LEN * 8
+#define DLEP_DIT_V4ADDR_FLAGMASK_ADDDROP    0x01
+
+/* Section 15.11: DLEP IPv6 Address Flags */
+#define DLEP_DIT_V6ADDR_FLAGMASK_BITLEN     DLEP_DIT_V6ADDR_FLAGS_LEN * 8
+#define DLEP_DIT_V6ADDR_FLAGMASK_ADDDROP    0x01
+
+/* Section 15.12: DLEP IPv4 Attached Subnet Flags */
+#define DLEP_DIT_V4SUBNET_FLAGMASK_BITLEN   DLEP_DIT_V4SUBNET_FLAGS_LEN * 8
+#define DLEP_DIT_V4SUBNET_FLAGMASK_ADDDROP  0x01
+
+/* Section 15.13: DLEP IPv6 Attached Subnet Flags */
+#define DLEP_DIT_V6SUBNET_FLAGMASK_BITLEN   DLEP_DIT_V6SUBNET_FLAGS_LEN * 8
+#define DLEP_DIT_V6SUBNET_FLAGMASK_ADDDROP  0x01
+
+/* Section 15.14: DLEP Well-known Port */
+#define DLEP_UDP_PORT 854
+#define DLEP_TCP_PORT 854
+
+/* Section 15.15: DLEP IPv4 Link-Local Multicast Address */
+#define DLEP_IPV4_ADDR "224.0.0.117"
+
+/* Section 15.16: DLEP IPv6 Link-Local Multicast Address */
+#define DLEP_IPV6_ADDR "FF02:0:0:0:0:0:1:7"

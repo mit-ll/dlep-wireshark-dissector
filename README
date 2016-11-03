@@ -1,0 +1,65 @@
+Wireshark Dissector Plugin for DLEP
+===================================
+
+Wireshark dissector plugin for the Dynamic Link Exchange Protocol ([DLEP][dlep]).
+
+Installation
+------------
+
+The following instructions are tailored and tested for Ubuntu 16.04 64-bit Desktop and Wireshark 2.6.8:
+
+* Install wireshark, install wireshark dependencies, download wireshark source code, and extract the DLEP plugin:
+
+      ```bash
+      cd ~/Downloads
+      sudo apt-get install wireshark
+      sudo apt-get build-dep wireshark
+      apt-get source wireshark
+      tar -zxf /path/to/dissector/tarball/dlep-wireshark-dissector-1.0.0.tgz -C ~/Downloads/wireshark-2.6.8/plugins/epan/dlep --strip-components=1
+      ```
+
+* Make and install the plugin:
+
+      ```bash
+      cd ~/Downloads/wireshark-2.6.8
+      mkdir build
+      cd build
+      cmake -DCUSTOM_PLUGIN_SRC_DIR="plugins/epan/dlep" ../
+      make -j8 -C plugins/epan/dlep
+      mkdir -p ~/.local/lib/wireshark/plugins/2.6/epan
+      cp run/plugins/2.6/epan/dlep.so ~/.local/lib/wireshark/plugins/2.6/epan/
+      ```
+
+Usage
+-----
+
+* Verify installation by confirming that the plugin is listed in the following Wireshark menu:
+
+        Help -> About Wireshark -> Plugins
+
+* Open up a sample capture file:
+
+        wireshark plugins/epan/dlep/test/capture1.pcapng
+
+* There are two preferences that adjust the TCP port and UDP port associated with DLEP packets.
+  User preferences for this plugin may be set in the following menu:
+
+        Edit -> Preferences... -> Protocols -> DLEP
+
+Testing
+-------
+
+Sample DLEP capture files and a README are located in ```dlep/test```.
+The capture files may be opened in Wireshark as an example capture or used for fuzz-testing the plugin.
+
+Caveats / Future Work
+---------------------
+
+* This dissector plugin adheres to [RFC 8175][rfc8175].
+* This plugin attempts to decode all Data Items within a DLEP Signal or Message. While unrecognized Data Items are reported as such, invalid or disallowed duplicate Data Items are not indicated (Section 12.1 of [RFC 8175][rfc8175]).
+* This plugin does not dissect Data Items belonging to DLEP extensions -- such Data Items are marked as "Unknown".
+* While DLEP TCP/UDP ports are configurable via user preferences, this plugin does not dynamically register ports provided by IPv4/6 Connection Point Data Items.
+* This plugin does not perform TCP segment reassembly. DLEP messages are assumed to not exceed the MTU of the link between a modem and router participating in the DLEP Session.
+
+[dlep]: https://datatracker.ietf.org/doc/draft-ietf-manet-dlep
+[rfc8175]: https://www.rfc-editor.org/rfc/rfc8175.txt
