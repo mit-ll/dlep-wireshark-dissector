@@ -1,0 +1,8 @@
+# Ignore the other plugins (useful when developing within wireshark/plugins/)
+/*
+!.gitignore
+!Custom.m4
+!Custom.make
+!Custom.nmake
+!README.md
+!dlep
